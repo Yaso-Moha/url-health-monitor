@@ -1,0 +1,15 @@
+CREATE TABLE IF NOT EXISTS websites (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    url TEXT NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS url_checks (
+    id SERIAL PRIMARY KEY,
+    website_id INTEGER REFERENCES websites(id) ON DELETE CASCADE,
+    status VARCHAR(10),
+    status_code INTEGER,
+    response_time INTEGER,
+    checked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+body{
+    margin:0;
+    background:#0f172a;
+    color:white;
+    font-family:Inter,sans-serif;
+}
+
+.light body{
+    background:#f8fafc;
+    color:#0f172a;
+}
+
+.light .bg-slate-950{
+    background-color:#f8fafc;
+}
+
+.light .bg-slate-950\/80{
+    background-color:rgb(15 23 42 / 0.35);
+}
+
+.light .bg-slate-900{
+    background-color:#ffffff;
+}
+
+.light .bg-slate-800{
+    background-color:#e2e8f0;
+}
+
+.light .border-slate-800{
+    border-color:#e2e8f0;
+}
+
+.light .border-slate-700{
+    border-color:#cbd5e1;
+}
+
+.light .text-white{
+    color:#0f172a;
+}
+
+.light .text-slate-300{
+    color:#334155;
+}
+
+.light .text-slate-400{
+    color:#475569;
+}
+
+.light .text-slate-500{
+    color:#64748b;
+}
+
+.light .placeholder\:text-slate-600::placeholder{
+    color:#94a3b8;
+}
+
+.light .hover\:bg-slate-900:hover,
+.light .hover\:bg-slate-800:hover{
+    background-color:#f1f5f9;
+}
+
+.light .hover\:text-white:hover{
+    color:#0f172a;
+}
