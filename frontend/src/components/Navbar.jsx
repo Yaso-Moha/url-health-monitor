@@ -1,4 +1,5 @@
 import { Activity, Moon, Sun } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function Navbar({ onToggleTheme, theme }) {
     return (
@@ -24,16 +25,25 @@ export default function Navbar({ onToggleTheme, theme }) {
 
             </div>
 
-            {onToggleTheme && (
-                <button
-                    aria-label="Toggle theme"
-                    className="rounded-xl border border-slate-800 p-3 text-slate-300 transition hover:bg-slate-900 hover:text-white"
-                    onClick={onToggleTheme}
-                    type="button"
+            <div className="flex items-center gap-3">
+                <Link
+                    className="rounded-xl border border-slate-800 px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-slate-900 hover:text-white"
+                    to="/status"
                 >
-                    {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
-                </button>
-            )}
+                    Public Status
+                </Link>
+
+                {onToggleTheme && (
+                    <button
+                        aria-label="Toggle theme"
+                        className="rounded-xl border border-slate-800 p-3 text-slate-300 transition hover:bg-slate-900 hover:text-white"
+                        onClick={onToggleTheme}
+                        type="button"
+                    >
+                        {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
+                    </button>
+                )}
+            </div>
 
         </nav>
     );

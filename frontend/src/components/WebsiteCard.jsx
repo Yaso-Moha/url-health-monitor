@@ -1,20 +1,18 @@
-import { Globe, Trash2 } from "lucide-react";
+import { Eye, Globe, Pause, Play, RotateCw, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { formatRelativeTime } from "../utils/formatTime";
 import { getFaviconUrl } from "../utils/websiteAssets";
 
-export default function WebsiteCard({ website, onDelete }) {
+export default function WebsiteCard({
+    onCheckNow,
+    onDelete,
+    onTogglePaused,
+    onTogglePublic,
+    website,
+}) {
 
     const status = website.status || "UNKNOWN";
     const faviconUrl = getFaviconUrl(website.url);
-
-    const handleDelete = () => {
-        const confirmed = window.confirm(`Delete ${website.name}? This will remove its monitoring history.`);
-
-        if (confirmed) {
-            onDelete(website.id);
-        }
-    };
 
     return (
 
@@ -64,7 +62,7 @@ export default function WebsiteCard({ website, onDelete }) {
                     <button
                         aria-label={`Delete ${website.name}`}
                         className="rounded-xl border border-slate-800 p-2 text-slate-400 transition hover:border-red-500/60 hover:bg-red-500/10 hover:text-red-400"
-                        onClick={handleDelete}
+                        onClick={() => onDelete(website)}
                         type="button"
                     >
                         <Trash2 size={18} />
@@ -126,12 +124,45 @@ export default function WebsiteCard({ website, onDelete }) {
             </div>
 
             <div className="mt-6 border-t border-slate-800 pt-4">
-                <Link
-                    className="text-sm font-semibold text-blue-400 transition hover:text-blue-300"
-                    to={`/website/${website.id}`}
-                >
-                    View details
-                </Link>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                    <Link
+                        className="text-sm font-semibold text-blue-400 transition hover:text-blue-300"
+                        to={`/website/${website.id}`}
+                    >
+                        View details
+                    </Link>
+
+                    <div className="flex gap-2">
+                        <button
+                            className="rounded-lg border border-slate-800 p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white"
+                            onClick={() => onCheckNow(website.id)}
+                            title="Check now"
+                            type="button"
+                        >
+                            <RotateCw size={16} />
+                        </button>
+                        <button
+                            className="rounded-lg border border-slate-800 p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white"
+                            onClick={() => onTogglePaused(website)}
+                            title={website.isPaused ? "Resume monitoring" : "Pause monitoring"}
+                            type="button"
+                        >
+                            {website.isPaused ? <Play size={16} /> : <Pause size={16} />}
+                        </button>
+                        <button
+                            className={`rounded-lg border p-2 transition ${
+                                website.isPublic
+                                    ? "border-blue-500/60 bg-blue-500/10 text-blue-400"
+                                    : "border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-white"
+                            }`}
+                            onClick={() => onTogglePublic(website)}
+                            title={website.isPublic ? "Hide from public status" : "Show on public status"}
+                            type="button"
+                        >
+                            <Eye size={16} />
+                        </button>
+                    </div>
+                </div>
             </div>
 
         </div>

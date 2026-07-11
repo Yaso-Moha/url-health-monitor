@@ -12,6 +12,7 @@ import Navbar from "../components/Navbar";
 import StatsCard from "../components/StatsCard";
 import WebsiteCard from "../components/WebsiteCard";
 import AddWebsiteModal from "../components/AddWebsiteModal";
+import ConfirmModal from "../components/ConfirmModal";
 import api from "../services/api";
 
 const WebsiteCardSkeleton = () => (
@@ -55,6 +56,7 @@ export default function Dashboard({ onToggleTheme, theme }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
+  const [websiteToDelete, setWebsiteToDelete] = useState(null);
 
   useEffect(() => {
     loadWebsites();
@@ -96,15 +98,59 @@ export default function Dashboard({ onToggleTheme, theme }) {
     setNotification({ type, message });
   };
 
-  const deleteWebsite = async (id) => {
+  const deleteWebsite = async () => {
+    if (!websiteToDelete) {
+      return;
+    }
+
     try {
-      await api.delete(`/websites/${id}`);
+      await api.delete(`/websites/${websiteToDelete.id}`);
       await loadWebsites();
       showNotification("success", "Website deleted successfully.");
     } catch (err) {
       const message = err.response?.data?.error || "Failed to delete website. Please try again.";
       showNotification("error", message);
+    } finally {
+      setWebsiteToDelete(null);
     }
+  };
+
+  const checkWebsiteNow = async (id) => {
+    try {
+      await api.post(`/websites/${id}/check`);
+      await loadWebsites();
+      showNotification("success", "Website checked.");
+    } catch (err) {
+      const message = err.response?.data?.error || "Failed to check website.";
+      showNotification("error", message);
+    }
+  };
+
+  const updateWebsiteSettings = async (website, updates, successMessage) => {
+    try {
+      await api.patch(`/websites/${website.id}`, updates);
+      await loadWebsites();
+      showNotification("success", successMessage);
+    } catch (err) {
+      const message = err.response?.data?.error || "Failed to update website.";
+      showNotification("error", message);
+    }
+  };
+
+  const togglePaused = (website) => {
+    updateWebsiteSettings(
+      website,
+      { isPaused: !website.isPaused },
+      website.isPaused ? "Monitoring resumed." : "Monitoring paused."
+    );
+  };
+
+  const togglePublic = (website) => {
+    updateWebsiteSettings(
+      website,
+      { isPublic: !website.isPublic },
+      website.isPublic ? "Hidden from public status page." : "Added to public status page."
+    );
   };
 
   const exportWebsites = () => {
@@ -194,6 +240,18 @@ export default function Dashboard({ onToggleTheme, theme }) {
   return (
     <div className="min-h-screen bg-slate-950 text-white">
       <Navbar onToggleTheme={onToggleTheme} theme={theme} />
+      <ConfirmModal
+        confirmLabel="Delete"
+        isOpen={Boolean(websiteToDelete)}
+        message={
+          websiteToDelete
+            ? `Delete ${websiteToDelete.name}? This removes its checks and incidents.`
+            : ""
+        }
+        onCancel={() => setWebsiteToDelete(null)}
+        onConfirm={deleteWebsite}
+        title="Delete Website"
+      />
 
       <div className="max-w-7xl mx-auto px-8 py-10">
         {notification && (
@@ -343,7 +401,10 @@ export default function Dashboard({ onToggleTheme, theme }) {
             paginatedWebsites.map((website) => (
               <WebsiteCard
                 key={website.id}
-                onDelete={deleteWebsite}
+                onCheckNow={checkWebsiteNow}
+                onDelete={setWebsiteToDelete}
+                onTogglePaused={togglePaused}
+                onTogglePublic={togglePublic}
                 website={website}
               />
             ))

@@ -3,7 +3,10 @@ import { useState } from "react";
 import api from "../services/api";
 
 const initialForm = {
+    checkIntervalSeconds: "60",
+    isPublic: false,
     name: "",
+    tag: "",
     url: "",
 };
 
@@ -24,11 +27,11 @@ export default function AddWebsiteModal({ onWebsiteAdded, onNotify }) {
     };
 
     const handleChange = (event) => {
-        const { name, value } = event.target;
+        const { checked, name, type, value } = event.target;
 
         setFormData((currentFormData) => ({
             ...currentFormData,
-            [name]: value,
+            [name]: type === "checkbox" ? checked : value,
         }));
 
         setErrors((currentErrors) => ({
@@ -41,6 +44,7 @@ export default function AddWebsiteModal({ onWebsiteAdded, onNotify }) {
         const nextErrors = {};
         const name = formData.name.trim();
         const url = formData.url.trim();
+        const interval = Number(formData.checkIntervalSeconds);
 
         if (!name) {
             nextErrors.name = "Website name is required.";
@@ -50,7 +54,7 @@ export default function AddWebsiteModal({ onWebsiteAdded, onNotify }) {
             nextErrors.url = "Website URL is required.";
         } else {
             try {
-                const parsedUrl = new URL(url);
+                const parsedUrl = new URL(url.includes("://") ? url : `https://${url}`);
 
                 if (!["http:", "https:"].includes(parsedUrl.protocol)) {
                     nextErrors.url = "URL must start with http:// or https://.";
@@ -58,6 +62,10 @@ export default function AddWebsiteModal({ onWebsiteAdded, onNotify }) {
             } catch {
                 nextErrors.url = "Enter a valid URL, including http:// or https://.";
             }
+        }
+
+        if (!Number.isInteger(interval) || interval < 30 || interval > 3600) {
+            nextErrors.checkIntervalSeconds = "Interval must be between 30 and 3600 seconds.";
         }
 
         setErrors(nextErrors);
@@ -75,7 +83,10 @@ export default function AddWebsiteModal({ onWebsiteAdded, onNotify }) {
 
         try {
             await api.post("/websites", {
+                checkIntervalSeconds: Number(formData.checkIntervalSeconds),
+                isPublic: formData.isPublic,
                 name: formData.name.trim(),
+                tag: formData.tag.trim(),
                 url: formData.url.trim(),
             });
 
@@ -113,6 +124,59 @@ export default function AddWebsiteModal({ onWebsiteAdded, onNotify }) {
                                     Add a URL to monitor its uptime and response time.
                                 </p>
                             </div>
+
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-300" htmlFor="website-tag">
+                                        Tag
+                                    </label>
+                                    <input
+                                        className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none transition placeholder:text-slate-600 focus:border-blue-500"
+                                        id="website-tag"
+                                        name="tag"
+                                        onChange={handleChange}
+                                        placeholder="Production"
+                                        type="text"
+                                        value={formData.tag}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-300" htmlFor="website-interval">
+                                        Interval
+                                    </label>
+                                    <select
+                                        className={`mt-2 w-full rounded-xl border bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-blue-500 ${
+                                            errors.checkIntervalSeconds ? "border-red-500" : "border-slate-700"
+                                        }`}
+                                        id="website-interval"
+                                        name="checkIntervalSeconds"
+                                        onChange={handleChange}
+                                        value={formData.checkIntervalSeconds}
+                                    >
+                                        <option value="30">30 seconds</option>
+                                        <option value="60">1 minute</option>
+                                        <option value="300">5 minutes</option>
+                                        <option value="900">15 minutes</option>
+                                        <option value="3600">1 hour</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {errors.checkIntervalSeconds && (
+                                <p className="-mt-3 text-sm text-red-400">{errors.checkIntervalSeconds}</p>
+                            )}
+
+                            <label className="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm font-semibold text-slate-300">
+                                <input
+                                    checked={formData.isPublic}
+                                    className="h-4 w-4 accent-blue-600"
+                                    name="isPublic"
+                                    onChange={handleChange}
+                                    type="checkbox"
+                                />
+                                Show on public status page
+                            </label>
 
                             <button
                                 aria-label="Close modal"

@@ -1,8 +1,7 @@
 const cron = require("node-cron");
 
-const pool = require("../config/db");
-const { getAllWebsites } = require("../models/websiteModel");
-const { checkWebsite } = require("./healthService");
+const { getDueWebsites } = require("../models/websiteModel");
+const { runWebsiteCheck } = require("./monitorService");
 
 const startCron = () => {
   // Run every minute
@@ -10,24 +9,11 @@ const startCron = () => {
     console.log("Running scheduled checks...");
 
     try {
-      const websites = await getAllWebsites();
+      const websites = await getDueWebsites();
 
       for (const website of websites) {
         try {
-          const result = await checkWebsite(website.url);
-
-          // Save to database
-               await pool.query(
-                     `INSERT INTO url_checks
-                     (website_id, status, status_code, response_time)
-                     VALUES ($1, $2, $3, $4)`,
-                    [
-                      website.id,
-                      result.status,
-                      result.statusCode,
-                      result.responseTime,
-                    ]
-                );
+          const result = await runWebsiteCheck(website);
 
           console.log(
             `${website.name}: ${result.status} (${result.responseTime} ms)`

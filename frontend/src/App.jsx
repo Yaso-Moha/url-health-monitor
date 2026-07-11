@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
+import PublicStatus from "./pages/PublicStatus";
 import WebsiteDetails from "./pages/WebsiteDetails";
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
                     path="/website/:id"
                     element={<WebsiteDetails onToggleTheme={toggleTheme} theme={theme} />}
                 />
+                <Route path="/status" element={<PublicStatus />} />
             </Routes>
         </BrowserRouter>
     );
